@@ -17,9 +17,9 @@ function App() {
 
           return (
             //always put a key when you're mapping over things
-            <div key={index} className="calendar-day">
+            <StyledCalendarDay key={index} isSelected={isSelected}>
               {day + 1}
-            </div>
+            </StyledCalendarDay>
           );
         })}
       </StyledCalendar>
@@ -36,21 +36,24 @@ const StyledCalendar = styled.div`
   padding: 10px;
   background: #fff;
   border-radius: 5px;
+`;
 
-  .calendar-day {
-    display: flex;
-    align-items: center; //align vertically (cross axis)
-    justify-content: center; //align horizontally (main axis)
-    background: none;
-    border-radius: 50%;
-    height: 30px;
-    width: 30px;
-    border: none;
-    transition: 0.3s ease background;
-    cursor: pointer;
-    &:hover {
-      background: #bada55;
-    }
+const StyledCalendarDay = styled.button`
+  display: flex;
+  align-items: center; //align vertically (cross axis)
+  justify-content: center; //align horizontally (main axis)
+  background: ${props => (props.isSelected ? "#c00c00" : "none")};
+  border-radius: 50%;
+  height: 30px;
+  width: 30px;
+  border: none;
+  transition: 0.3s ease background;
+  cursor: pointer;
+  &:hover {
+    background: #bada55;
+  }
+  &.is-selected {
+    background: #c00c00;
   }
 `;
 
