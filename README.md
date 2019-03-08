@@ -1,2 +1,0 @@
-# jsCalendar
-Created with CodeSandbox
