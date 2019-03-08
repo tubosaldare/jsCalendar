@@ -1,24 +1,57 @@
-import React from "react";
+import React, { useState } from "react";
 import ReactDOM from "react-dom";
 import styled from "styled-components";
 import "./styles.css";
 
 function App() {
+  const [startDate, setStartDate] = useState(null);
+  const [hoverDate, setHoverDate] = useState(null);
+  const [endDate, setEndDate] = useState(null);
   const calendarDates = new Array(31).fill(0).map((e, i) => i);
 
-  let startDate = 1;
-  let endDate;
+  function updateDate(day) {
+    if (!startDate) setStartDate(day);
+    setEndDate(day);
+  }
+
+  function handleHover(day) {
+    if (!startDate) return;
+    setHoverDate(day);
+  }
 
   return (
     <div className="App">
+      <p>Start Date: {startDate}</p>
+      <p>End Date: {endDate}</p>
+
       <StyledCalendar className="calendar">
         {calendarDates.map((day, index) => {
-          const isSelected = startDate === index + 1;
+          const realDayNumber = index + 1;
+
+          let isSelected = false;
+          let isInBetween = false;
+          if (realDayNumber === startDate) isSelected = true;
+          if (realDayNumber === endDate) isSelected = true;
+          if (
+            realDayNumber > startDate &&
+            (realDayNumber < hoverDate || realDayNumber < endDate)
+          )
+            isInBetween = true;
 
           return (
             //always put a key when you're mapping over things
-            <StyledCalendarDay key={index} isSelected={isSelected}>
-              {day + 1}
+            <StyledCalendarDay
+              key={index}
+              isSelected={isSelected}
+              isInBetween={isInBetween}
+              isEnd={endDate === realDayNumber}
+              onClick={() => updateDate(realDayNumber)}
+              onMouseEnter={() => {
+                if (endDate && endDate !== startDate) return;
+                handleHover(realDayNumber);
+              }}
+            >
+              {realDayNumber}
             </StyledCalendarDay>
           );
         })}
@@ -32,28 +65,27 @@ const StyledCalendar = styled.div`
   border: 1px solid #000;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
-  grid-gap: 10px;
-  padding: 10px;
   background: #fff;
-  border-radius: 5px;
 `;
 
 const StyledCalendarDay = styled.button`
   display: flex;
   align-items: center; //align vertically (cross axis)
   justify-content: center; //align horizontally (main axis)
-  background: ${props => (props.isSelected ? "#c00c00" : "none")};
-  border-radius: 50%;
-  height: 30px;
-  width: 30px;
+  background: ${props => {
+    if (props.isEnd) return "#0FF";
+    if (props.isSelected) return "#10ADED";
+    if (props.isInBetween) return "#C0FFEE";
+
+    return "none";
+  }}
   border: none;
   transition: 0.3s ease background;
+  padding: 15px;
+  color: #444;
   cursor: pointer;
   &:hover {
     background: #bada55;
-  }
-  &.is-selected {
-    background: #c00c00;
   }
 `;
 
