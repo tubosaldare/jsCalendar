@@ -4,42 +4,61 @@ import styled from "styled-components";
 import "./styles.css";
 
 function App() {
+  const [dateType, setDateType] = useState("start"); // start/end
   const [startDate, setStartDate] = useState(null);
   const [hoverDate, setHoverDate] = useState(null);
   const [endDate, setEndDate] = useState(null);
-  const calendarDates = new Array(31).fill(0).map((e, i) => i);
+
+  const calendarDates = Array(31)
+    .fill(0)
+    .map((e, i) => i);
 
   function updateDate(day) {
-    if (!startDate) setStartDate(day);
+    if (dateType === "start") {
+      if (endDate && day > endDate) return;
+      setStartDate(day);
+      setDateType("end");
+      return;
+    }
     setEndDate(day);
   }
 
   function handleHover(day) {
-    if (!startDate) return;
+    if (!startDate || endDate) return;
     setHoverDate(day);
+  }
+
+  function checkInBetween(day) {
+    if (!endDate) return day > startDate && day < hoverDate;
+    return day > startDate && day < endDate;
   }
 
   return (
     <div className="App">
-      <p>Start Date: {startDate}</p>
-      <p>End Date: {endDate}</p>
+      <StyledDateChooser dateType={dateType}>
+        <StyledDateChooserButton
+          onClick={() => setDateType("start")}
+          isChoosing={dateType === "start"}
+        >
+          Start Date <span>{startDate}</span>
+        </StyledDateChooserButton>
+        <StyledDateChooserButton
+          onClick={() => setDateType("end")}
+          isChoosing={dateType === "end"}
+        >
+          End Date <span>{endDate}</span>
+        </StyledDateChooserButton>
+      </StyledDateChooser>
 
       <StyledCalendar className="calendar">
         {calendarDates.map((day, index) => {
           const realDayNumber = index + 1;
-
           let isSelected = false;
-          let isInBetween = false;
-          if (realDayNumber === startDate) isSelected = true;
-          if (realDayNumber === endDate) isSelected = true;
-          if (
-            realDayNumber > startDate &&
-            (realDayNumber < hoverDate || realDayNumber < endDate)
-          )
-            isInBetween = true;
+          let isInBetween = checkInBetween(realDayNumber);
+          if (realDayNumber === startDate) isSelected = true; // start
+          if (realDayNumber === endDate) isSelected = true; // end
 
           return (
-            //always put a key when you're mapping over things
             <StyledCalendarDay
               key={index}
               isSelected={isSelected}
@@ -47,7 +66,7 @@ function App() {
               isEnd={endDate === realDayNumber}
               onClick={() => updateDate(realDayNumber)}
               onMouseEnter={() => {
-                if (endDate && endDate !== startDate) return;
+                if (endDate) return;
                 handleHover(realDayNumber);
               }}
             >
@@ -60,33 +79,54 @@ function App() {
   );
 }
 
+const StyledDateChooser = styled.div`
+  display: flex;
+  margin-bottom: 20px;
+`;
+
+const StyledDateChooserButton = styled.button`
+  color: #fff;
+  flex: 1;
+  padding: 15px;
+  background: none;
+  cursor: pointer;
+  border: none;
+  border-bottom: ${props => (props.isChoosing ? "2px solid #fff" : "none")};
+
+  span {
+    display: block;
+    font-size: 50px;
+  }
+`;
+
 const StyledCalendar = styled.div`
   max-width: 400px;
-  border: 1px solid #000;
+  border: 1px solid black;
   display: grid;
   grid-template-columns: repeat(7, 1fr);
   background: #fff;
 `;
 
 const StyledCalendarDay = styled.button`
-  display: flex;
-  align-items: center; //align vertically (cross axis)
-  justify-content: center; //align horizontally (main axis)
-  background: ${props => {
-    if (props.isEnd) return "#0FF";
-    if (props.isSelected) return "#10ADED";
-    if (props.isInBetween) return "#C0FFEE";
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	padding: 15px;
+	color: #444;
+	transition: 0.3s ease background;
+	border: none;
+	background: ${props => {
+    if (props.isEnd) return "#f7c99b";
+    if (props.isSelected) return "peachpuff";
+    if (props.isInBetween) return "peachpuff";
 
     return "none";
   }}
-  border: none;
-  transition: 0.3s ease background;
-  padding: 15px;
-  color: #444;
-  cursor: pointer;
-  &:hover {
-    background: #bada55;
-  }
+	cursor: pointer;
+
+	&:hover {
+		background: #f7c99b;
+	}
 `;
 
 const rootElement = document.getElementById("root");
